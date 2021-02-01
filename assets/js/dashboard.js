@@ -333,68 +333,60 @@ function loadJSON(callback) {
     $("#carteOnboardTotal").text((dashboardData.tot_carteOnboard + dashboardData.tot_carteOnboard_june).toLocaleString("it"));
     $("#trxTotal").text((dashboardData.tot_trx_per_day + dashboardData.tot_trx_per_day_june).toLocaleString("it"));
 
-    var aderentiLine = document.getElementById("aderentiLine") ? document.getElementById("aderentiLine").getContext("2d") : undefined;
-    var aderentiChart = aderentiLine ? new Chart(aderentiLine, {
-      type: "bar",
-      options: {
-        responsive: true,
-        title: {
-          display: false,
-          text: "Utenti cashback ",
-        },
-        scales: {
-          xAxes: [
-            {
-              gridLines: {
-                display: false,
-              },
-              ticks: {
-                fontSize: 15,
-                fontColor: "#5C6F82",
-                fontFamily: "'Titillium Web', Arial",
-              },
-              type: 'time',
-              time: {
-                stepSize: 7,
-                unit: 'day'
-              }
-            },
-          ],
-          yAxes: [
-            {
-              gridLines: {
-                display: true,
-              },
-              ticks: {
-                display: true,
-                fontSize: 12,
-                fontColor: "#5C6F82",
-                fontFamily: "'Titillium Web', Arial",
-                maxTicksLimit: 5,
-                callback: formatNumberSuffix
-              },
-            },
-          ],
-        },
-        legend: {
-          position: 'bottom',
-          labels: {
-            boxWidth: 8,
-            usePointStyle: true,
-            fontFamily: "'Titillium Web', Arial",
-
-          }
-        },
-        tooltips: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            title: tooltipTitleCallbackXDate,
-            label: tooltipLabelCallbackYNumber
-          }
+    var aderentiSpec = {
+      "$schema": "https://vega.github.io/schema/vega/v5.json",
+      "description": "A basic grouped bar chart example.",
+      "width": 300,
+      "height": 360,
+      "padding": 5,
+      "data": [
+        {"name": "source_1", "url": "https://pdnd-prod-dl-1-public-data.s3.eu-central-1.amazonaws.com/dashboard/pagopa/dashboard-io.json?", "format": {"property": "aderenti_june", "type": "json"}},
+        {
+          "name": "table",
+          "url": "https://pdnd-prod-dl-1-public-data.s3.eu-central-1.amazonaws.com/dashboard/pagopa/dashboard-io.json",
+          "format": {"property": "carteOnboard_june", "type": "json", "parse": {"day": "date"}},
+          "transform": [{"type": "lookup", "from": "source_1", "key": "day", "fields": ["day"], "values": ["total"], "as": ["carte"]}, {"type": "fold", "fields": ["tot", "carte"], "as": ["key", "value"]}]
         }
-      },
-    }) : undefined;
+      ],
+      "scales": [
+        {"name": "xscale", "type": "band", "domain": {"data": "table", "field": "day", "sort": true}, "range": "width", "paddingOuter": 0, "paddingInner": 0.2},
+        {"name": "xscaletime", "type": "time", "domain": {"data": "table", "field": "day"}, "range": "width", "padding": {"signal": "band / 2"}},
+        {"name": "yscale", "type": "linear", "domain": {"data": "table", "field": "value"}, "range": "height", "round": true, "zero": true, "nice": true},
+        {"name": "color", "type": "ordinal", "domain": {"data": "table", "field": "key"}, "range": ["#15c5f8", "rgb(0, 115, 230)"]}
+      ],
+      "axes": [{"orient": "left", "scale": "yscale", "tickSize": 0, "labelPadding": 4, "zindex": 1}, {"orient": "bottom", "scale": "xscaletime"}],
+      "signals": [
+        {"name": "width", "init": "isFinite(containerSize()[0]) ? containerSize()[0] : 200", "on": [{"update": "isFinite(containerSize()[0]) ? containerSize()[0] : 200", "events": "window:resize"}]},
+        {"name": "band", "update": "bandwidth('xscale')"}
+      ],
+      "marks": [
+        {
+          "type": "group",
+          "from": {"facet": {"data": "table", "name": "facet", "groupby": "day"}},
+          "encode": {"enter": {"x": {"scale": "xscale", "field": "day"}}},
+          "signals": [{"name": "width", "update": "bandwidth('xscale')"}],
+          "scales": [{"name": "pos", "type": "band", "range": "width", "domain": {"data": "facet", "field": "key"}}],
+          "marks": [
+            {
+              "name": "bars",
+              "from": {"data": "facet"},
+              "type": "rect",
+              "encode": {
+                "enter": {
+                  "x": {"scale": "pos", "field": "key"},
+                  "width": {"scale": "pos", "band": 1},
+                  "y": {"scale": "yscale", "field": "value"},
+                  "y2": {"scale": "yscale", "value": 0},
+                  "fill": {"scale": "color", "field": "key"}
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "legends": [{"orient": "bottom", "fill": "color", "direction": "horizontal", "symbolType": "square", "title": "key"}]
+    };
+    vegaEmbed('#aderentiChart', aderentiSpec);
 
     var trxLine = document.getElementById("trxLine") ? document.getElementById("trxLine").getContext("2d") : undefined;
     var trxChart = trxLine ? new Chart(trxLine, {
@@ -601,10 +593,6 @@ function loadJSON(callback) {
         [dashboardData.trx_1, dashboardData.trx_10, TRX_THRESHOLDS[0]],
         [dashboardData.trx_1_june, dashboardData.trx_10_june, TRX_THRESHOLDS[1]]
       ]],
-      [aderentiChart, generateAderenti, [
-        [dashboardData.aderenti, dashboardData.carteOnboard],
-        [dashboardData.aderenti_june, dashboardData.carteOnboard_june]]
-      ],
       [trxChart, generateTrxDay, [[dashboardData.trx_per_day], [dashboardData.trx_per_day_june]]],
       [trxAmountChart, generateTrxAmount, [[dashboardData.all_range], [dashboardData.all_range_june]]],
       [userTrxChart, generateUserTrx, [

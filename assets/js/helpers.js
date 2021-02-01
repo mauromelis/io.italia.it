@@ -253,41 +253,6 @@ function generateDownloads(downloads) {
     };
   }
 
-  function generateAderenti(aderenti, carte) {
-    var labels = [];
-    var users = [];
-    var cards = [];
-    for (let i = 0; i < aderenti.length; i++) {
-      var obj = aderenti[i]
-      var monthDate = moment(obj['day']);
-      // TOTALBONUS = TOTALBONUS + obj['total'];
-      const date = monthDate.format("YYYY-MM-DD");
-      labels.push(date.toString());
-      users.push(obj['total']);
-      const cardsFound = carte.find(function (d) { return d.day === obj.day });
-      cards.push(cardsFound && cardsFound.tot);
-    }
-    return {
-      labels,
-      datasets: [
-        {
-          label: "Utenti aderenti",
-          data: users,
-          backgroundColor: "rgb(0, 115, 230)",
-          pointHitRadius: 5,
-          pointRadius: 0
-        },
-        {
-          label: "Strumenti di pagamento",
-          data: cards,
-          backgroundColor: "#15c5f8",
-          pointHitRadius: 5,
-          pointRadius: 0
-        },
-      ],
-    };
-  }
-
   function generateTrxDay(trx) {
     var labels = [];
     var transactions = [];
