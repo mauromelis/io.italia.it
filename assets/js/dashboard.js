@@ -386,7 +386,7 @@ function loadJSON(callback) {
       ],
       "legends": [{"orient": "bottom", "fill": "color", "direction": "horizontal", "symbolType": "square", "title": "key"}]
     };
-    vegaEmbed('#aderentiChart', aderentiSpec);
+    vegaEmbed('#aderentiChart', aderentiSpec, { ast: true });
 
     var trxLine = document.getElementById("trxLine") ? document.getElementById("trxLine").getContext("2d") : undefined;
     var trxChart = trxLine ? new Chart(trxLine, {
