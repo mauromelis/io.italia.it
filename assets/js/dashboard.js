@@ -453,57 +453,27 @@ function loadJSON(callback) {
     };
     vegaEmbed('#trxAmountChart', trxAmountSpec, { ast: true });
 
-    var userTrxCtx = document.getElementById("userTrxChart") ? document.getElementById("userTrxChart").getContext("2d") : undefined;
-    var userTrxChart = userTrxCtx ? new Chart(userTrxCtx, {
-      type: "bar",
-      options: {
-        responsive: true,
-        legend: {
-          display: false,
-        },
-        title: {
-          display: false,
-          text: "Utenti cashback ",
-        },
-        scales: {
-          xAxes: [
-            {
-              gridLines: {
-                display: false,
-              },
-              ticks: {
-                fontSize: 15,
-                fontColor: "#5C6F82",
-                fontFamily: "'Titillium Web', Arial",
-              },
-            },
-          ],
-          yAxes: [
-            {
-              // type: 'logarithmic',
-              gridLines: {
-                display: true,
-              },
-              ticks: {
-                display: true,
-                fontSize: 12,
-                fontColor: "#5C6F82",
-                fontFamily: "'Titillium Web', Arial",
-                maxTicksLimit: 5,
-                callback: formatNumberSuffix
-              },
-            },
-          ],
-        },
-        tooltips: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            label: tooltipLabelCallbackYNumber
-          }
-        }
+    var userTrxSpec = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+      "width": "container",
+      "height": 360,
+      "config": {"view": {"stroke": "transparent"}},
+      "data": {
+        "url": "https://pdnd-prod-dl-1-public-data.s3.eu-central-1.amazonaws.com/dashboard/pagopa/dashboard-io.json?",
+        "format": {"property": "user_by_trx_bin_june"}
       },
-    }) : undefined;
+      "transform": [
+        {"window": [{"op": "last_value", "field": "bin", "as": "bin_next"}], "frame": [0, 1]},
+        {"calculate": "datum.bin !== datum.bin_next ? join([datum.bin || 1, datum.bin_next - 1], '-') : datum.bin + '+'", "as": "bin_label"}
+      ],
+      "mark": {"type": "bar", "tooltip": true},
+      "encoding": {
+        "x": {"field": "bin_label", "type": "ordinal", "title": null, "sort": null, "axis": {"tickCount": 5, "grid": false, "labelAngle": 0}},
+        "y": {"field": "count", "type": "quantitative", "title": null, "axis": {"tickCount": 5, "format": "~s"}},
+        "color": {"field": "bin", "type": "quantitative", "scale": {"type": "threshold", "domain": [50], "range": ["#15c5f8", "rgb(0, 115, 230)"]}, "legend": null}
+      }
+    };
+    vegaEmbed('#userTrxChart', userTrxSpec, { ast: true });
 
     // Cashback periods
     var cardsDataMap = { // map element ids to dashboard data
@@ -515,11 +485,7 @@ function loadJSON(callback) {
       [userTrxThresholdChart, generateUserTrxThreshold, [
         [dashboardData.trx_1, dashboardData.trx_10, TRX_THRESHOLDS[0]],
         [dashboardData.trx_1_june, dashboardData.trx_10_june, TRX_THRESHOLDS[1]]
-      ]],
-      [userTrxChart, generateUserTrx, [
-        [dashboardData.user_by_trx_bin, TRX_THRESHOLDS[0]],
-        [dashboardData.user_by_trx_bin_june, TRX_THRESHOLDS[1]]]
-      ],
+      ]]
     ];
 
     function changeCashbackPeriod(period) {
