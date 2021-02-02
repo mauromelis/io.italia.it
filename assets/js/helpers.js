@@ -253,30 +253,6 @@ function generateDownloads(downloads) {
     };
   }
 
-  function generateTrxAmount(raw) {
-    var colorRange = ['rgb(0, 115, 230)', '#2d489d', '#00264D'];
-    var clean = raw.slice();
-    var labels = clean.map(function (d) { return d.ran + '€' });
-    var data = clean.map(function (d) { return d.count });
-    var backgroundColors = raw.map(function(d) {
-      var binWidth = d.bin_width || Infinity;
-      var colorIndex = binWidth <= 5 ? 0 : binWidth <= 25 ? 1 : 2;
-      return colorRange[colorIndex];
-    })
-    return {
-      labels,
-      datasets: [
-        {
-          label: "Numero transazioni",
-          data: data,
-          backgroundColor: backgroundColors,
-          pointHitRadius: 5,
-          pointRadius: 0
-        },
-      ],
-    };
-  }
-
   function generateUserTrx(raw, threshold) {
     var clean = raw.filter(function(d) { return d.bin <= 150 })
     var labels = clean.map(function (d, i) {

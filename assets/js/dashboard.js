@@ -434,56 +434,24 @@ function loadJSON(callback) {
       },
     }) : undefined;
 
-    var trxAmountCtx = document.getElementById("trxAmountChart") ? document.getElementById("trxAmountChart").getContext("2d") : undefined;
-    var trxAmountChart = trxAmountCtx ? new Chart(trxAmountCtx, {
-      type: "bar",
-      options: {
-        responsive: true,
-        legend: {
-          display: false,
-        },
-        title: {
-          display: false,
-          text: "Utenti per importo transazione",
-        },
-        scales: {
-          xAxes: [
-            {
-              gridLines: {
-                display: false,
-              },
-              ticks: {
-                fontSize: 15,
-                fontColor: "#5C6F82",
-                fontFamily: "'Titillium Web', Arial",
-              },
-            },
-          ],
-          yAxes: [
-            {
-              gridLines: {
-                display: true,
-              },
-              ticks: {
-                display: true,
-                fontSize: 12,
-                fontColor: "#5C6F82",
-                fontFamily: "'Titillium Web', Arial",
-                maxTicksLimit: 5,
-                callback: formatNumberSuffix
-              },
-            },
-          ],
-        },
-        tooltips: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            label: tooltipLabelCallbackYNumber
-          }
-        }
+    var trxAmountSpec = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+      "width": "container",
+      "height": 360,
+      "config": {"view": {"stroke": "transparent"}},
+      "data": {
+        "url": "https://pdnd-prod-dl-1-public-data.s3.eu-central-1.amazonaws.com/dashboard/pagopa/dashboard-io.json?",
+        "format": {"property": "all_range_june"}
       },
-    }) : undefined;
+      "transform": [{"calculate": "isNaN(+datum.bin_width) ? null : +datum.bin_width", "as": "bin_width"}],
+      "mark": {"type": "bar", "tooltip": true},
+      "encoding": {
+        "x": {"field": "ran", "type": "ordinal", "title": null, "sort": null, "axis": {"tickCount": 5, "grid": false, "labelAngle": 0}},
+        "y": {"field": "count", "type": "quantitative", "title": null, "axis": {"tickCount": 5, "format": "~s"}},
+        "color": {"field": "bin_width", "type": "ordinal", "scale": {"range": ["#00264D", "rgb(0, 115, 230)", "#2d489d"]}, "legend": null}
+      }
+    };
+    vegaEmbed('#trxAmountChart', trxAmountSpec, { ast: true });
 
     var userTrxCtx = document.getElementById("userTrxChart") ? document.getElementById("userTrxChart").getContext("2d") : undefined;
     var userTrxChart = userTrxCtx ? new Chart(userTrxCtx, {
@@ -548,7 +516,6 @@ function loadJSON(callback) {
         [dashboardData.trx_1, dashboardData.trx_10, TRX_THRESHOLDS[0]],
         [dashboardData.trx_1_june, dashboardData.trx_10_june, TRX_THRESHOLDS[1]]
       ]],
-      [trxAmountChart, generateTrxAmount, [[dashboardData.all_range], [dashboardData.all_range_june]]],
       [userTrxChart, generateUserTrx, [
         [dashboardData.user_by_trx_bin, TRX_THRESHOLDS[0]],
         [dashboardData.user_by_trx_bin_june, TRX_THRESHOLDS[1]]]
