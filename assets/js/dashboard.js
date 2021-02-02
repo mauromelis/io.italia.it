@@ -388,67 +388,22 @@ function loadJSON(callback) {
     };
     vegaEmbed('#aderentiChart', aderentiSpec, { ast: true });
 
-    var trxLine = document.getElementById("trxLine") ? document.getElementById("trxLine").getContext("2d") : undefined;
-    var trxChart = trxLine ? new Chart(trxLine, {
-      type: "line",
-      options: {
-        elements: {
-          line: {
-            tension: 0
-          },
-        },
-        responsive: true,
-        legend: {
-          display: false,
-        },
-        title: {
-          display: false,
-          text: "Transazioni ",
-        },
-        scales: {
-          xAxes: [
-            {
-              gridLines: {
-                display: false,
-              },
-              ticks: {
-                fontSize: 15,
-                fontColor: "#5C6F82",
-                fontFamily: "'Titillium Web', Arial",
-              },
-              type: 'time',
-              time: {
-                stepSize: 7,
-                unit: 'day'
-              }
-            },
-          ],
-          yAxes: [
-            {
-              gridLines: {
-                display: true,
-              },
-              ticks: {
-                display: true,
-                fontSize: 12,
-                fontColor: "#5C6F82",
-                fontFamily: "'Titillium Web', Arial",
-                maxTicksLimit: 5,
-                callback: formatNumberSuffix
-              },
-            },
-          ],
-        },
-        tooltips: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            title: tooltipTitleCallbackXDate,
-            label: tooltipLabelCallbackYNumber
-          }
-        }
+    var trxSpec = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+      "width": "container",
+      "height": 360,
+      "config": {"view": {"stroke": "transparent"}},
+      "data": {
+        "url": "https://pdnd-prod-dl-1-public-data.s3.eu-central-1.amazonaws.com/dashboard/pagopa/dashboard-io.json?",
+        "format": {"property": "trx_per_day_june"}
       },
-    }) : undefined;
+      "mark": {"type": "area", "color": "rgba(0, 115, 230, 0.2)", "line": {"color": "rgb(0, 115, 230)"}, "tooltip": true},
+      "encoding": {
+        "x": {"field": "day", "type": "temporal", "title": null, "axis": {"tickCount": 5, "grid": false}},
+        "y": {"field": "count", "type": "quantitative", "title": null, "axis": {"tickCount": 5, "format": "~s"}}
+      }
+    };
+    vegaEmbed('#trxChart', trxSpec, { ast: true });
 
     var userTrxThresholdCtx = document.getElementById("userTrxThreshold") ? document.getElementById("userTrxThreshold").getContext("2d") : undefined;
     var userTrxThresholdChart = userTrxThresholdCtx ? new Chart(userTrxThresholdCtx, {
@@ -593,7 +548,6 @@ function loadJSON(callback) {
         [dashboardData.trx_1, dashboardData.trx_10, TRX_THRESHOLDS[0]],
         [dashboardData.trx_1_june, dashboardData.trx_10_june, TRX_THRESHOLDS[1]]
       ]],
-      [trxChart, generateTrxDay, [[dashboardData.trx_per_day], [dashboardData.trx_per_day_june]]],
       [trxAmountChart, generateTrxAmount, [[dashboardData.all_range], [dashboardData.all_range_june]]],
       [userTrxChart, generateUserTrx, [
         [dashboardData.user_by_trx_bin, TRX_THRESHOLDS[0]],

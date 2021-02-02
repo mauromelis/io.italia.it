@@ -253,33 +253,6 @@ function generateDownloads(downloads) {
     };
   }
 
-  function generateTrxDay(trx) {
-    var labels = [];
-    var transactions = [];
-    for (let i = 0; i < trx.length; i++) {
-      var obj = trx[i]
-      var monthDate = moment(obj['day']);
-      // TOTALBONUS = TOTALBONUS + obj['total'];
-      const date = monthDate.format("YYYY-MM-DD");
-      labels.push(date.toString());
-      transactions.push(obj['count']);
-    }
-    return {
-      labels,
-      datasets: [
-        {
-          label: "Numero transazioni",
-          data: transactions,
-          borderWidth: 2,
-          backgroundColor: "rgb(0, 115, 230, 0.2)",
-          borderColor: "rgb(0, 115, 230)",
-          pointHitRadius: 5,
-          pointRadius: 0
-        },
-      ],
-    };
-  }
-
   function generateTrxAmount(raw) {
     var colorRange = ['rgb(0, 115, 230)', '#2d489d', '#00264D'];
     var clean = raw.slice();
