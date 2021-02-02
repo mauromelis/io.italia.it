@@ -405,34 +405,21 @@ function loadJSON(callback) {
     };
     vegaEmbed('#trxChart', trxSpec, { ast: true });
 
-    var userTrxThresholdCtx = document.getElementById("userTrxThreshold") ? document.getElementById("userTrxThreshold").getContext("2d") : undefined;
-    var userTrxThresholdChart = userTrxThresholdCtx ? new Chart(userTrxThresholdCtx, {
-      type: "pie",
-      options: {
-        responsive: true,
-        legend: {
-          position: 'bottom',
-          labels: {
-            boxWidth: 8,
-            usePointStyle: true,
-            fontFamily: "'Titillium Web', Arial",
-            fontColor: "#fff",
-          },
-        },
-        tooltips: {
-          mode: 'nearest',
-          intersect: false,
-
-          callbacks: {
-            label: tooltipLabelCallbackArcNumber
-          }
-        },
-        hover: {
-          mode: 'nearest',
-          intersect: false
-        }
-      },
-    }) : undefined;
+    var userTrxThresholdSpec = {
+      "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+      "width": "container",
+      "height": 110,
+      "background": "transparent",
+      "config": {"view": {"stroke": "transparent"}},
+      "data": {"url": "https://pdnd-prod-dl-1-public-data.s3.eu-central-1.amazonaws.com/dashboard/pagopa/dashboard-io.json"},
+      "transform": [{"fold": ["trx_1_june", "trx_10_june"]}],
+      "mark": {"type": "arc", "tooltip": true},
+      "encoding": {
+        "theta": {"field": "value", "type": "quantitative"},
+        "color": {"field": "key", "title": null, "sort": null, "scale": {"range": ["rgb(38, 200, 247)", "#fff"]}, "legend": {"orient": "bottom"}}
+      }
+    };
+    vegaEmbed('#userTrxThresholdChart', userTrxThresholdSpec, { ast: true });
 
     var trxAmountSpec = {
       "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
@@ -482,10 +469,6 @@ function loadJSON(callback) {
       "#trx_1": [dashboardData.trx_1 + dashboardData.trx_10, dashboardData.trx_1_june + dashboardData.trx_10_june],
     };
     var chartDataMap = [ // map chart and generator to dashboard data
-      [userTrxThresholdChart, generateUserTrxThreshold, [
-        [dashboardData.trx_1, dashboardData.trx_10, TRX_THRESHOLDS[0]],
-        [dashboardData.trx_1_june, dashboardData.trx_10_june, TRX_THRESHOLDS[1]]
-      ]]
     ];
 
     function changeCashbackPeriod(period) {

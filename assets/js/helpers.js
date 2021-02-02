@@ -236,19 +236,3 @@ function generateDownloads(downloads) {
       ],
     };
   }
-
-  function generateUserTrxThreshold(below, above, threshold) {
-    var data = [below, above]
-    return {
-      labels: ["tra 1 e " + (threshold - 1), threshold + " e più"],
-      datasets: [
-        {
-          data: data,
-          backgroundColor: ["rgb(38, 200, 247)", "#fff"],
-          hoverBackgroundColor: ["rgb(10, 160, 220)"],
-          borderColor: "#06c",
-          hoverBorderColor: "#06c",
-        },
-      ],
-    };
-  }
